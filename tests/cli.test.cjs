@@ -4,9 +4,15 @@ const { spawnSync } = require('node:child_process');
 const cli = require('node:path').join(__dirname, '../cli.js');
 const run = (...a) => spawnSync(process.execPath, [cli, ...a], { encoding: 'utf8' });
 
-test('bad CLI input exits 2 before loading the native library', () => {
-    for (const args of [[], ['records', 'a.esm'], ['-p', '/x', 'masters', 'a.esm', '-g', 'nope'],
-                        ['-p', '/x', 'records', 'a.esm', 'WEAP', '-n', 'abc'], ['records', 'a.esm', 'WEAP']]) {
+test('bad CLI input exits 2', () => {
+    for (const args of [[], ['records', 'a.esm'], ['masters', 'a.esm', '-g', 'nope'],
+                        ['records', 'a.esm', 'WEAP', '-n', 'abc']]) {
         assert.equal(run(...args).status, 2, args.join(' '));
     }
+});
+
+test('unreadable plugin exits 1 with a message', () => {
+    const r = run('masters', 'does-not-exist.esp');
+    assert.equal(r.status, 1);
+    assert.match(r.stderr, /ENOENT/);
 });

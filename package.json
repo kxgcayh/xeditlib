@@ -1,7 +1,7 @@
 {
   "name": "xeditlib",
   "version": "1.0.2",
-  "description": "Node.js FFI wrapper for XEditLib — programmatic access to xEdit for Bethesda game plugins (ESP/ESM/ESL)",
+  "description": "Bethesda plugin (ESP/ESM/ESL) tools: a cross-platform pure-JS reader and CLI, plus a Node.js FFI wrapper for XEditLib",
   "main": "xelib.js",
   "bin": {
     "xeditlib": "cli.js"

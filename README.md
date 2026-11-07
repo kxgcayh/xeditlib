@@ -4,9 +4,50 @@ Node.js wrapper for [XEditLib](https://github.com/z-edit/xedit-lib) — programm
 
 Uses [koffi](https://koffi.dev/) for FFI bindings. No C++ compilation required — just install and go.
 
-## Platform support
+## Two ways to use it
 
-The JavaScript API and CLI have no OS-specific code. They load a native XEditLib build:
+| | Pure-JS reader (`esp.js`, CLI) | Native wrapper (`xelib.js`) |
+|---|---|---|
+| Needs XEditLib | no | yes |
+| Windows / macOS / Linux | yes | Windows (DLL bundled); other OSes need a build you supply |
+| Read plugins | yes (records, masters) | yes (everything xEdit does) |
+| Edit / save, conflicts, references | no | yes |
+
+Use the CLI or `esp.js` for read-only inspection on any OS. Use `xelib.js` when you need editing or xEdit's full logic; it needs a native XEditLib build.
+
+## CLI (any OS, no native library)
+
+```bash
+npx xeditlib records "Skyrim.esm" WEAP -n 5
+npx xeditlib masters "MyMod.esp"
+npx xeditlib -g tes4 records Oblivion.esm NPC_   # Oblivion/FO3/FNV use older record headers
+npx xeditlib --help
+```
+
+| Command | Description |
+|---------|-------------|
+| `records <file> <SIG>` | List records of a signature as `formid<TAB>editorId<TAB>name` |
+| `masters <file>` | List a plugin's masters |
+
+| Option | Description |
+|--------|-------------|
+| `-g, --game <mode>` | `tes4`, `fo3`, `fnv`, `tes5`, `sse`, `fo4` (default `sse`) |
+| `-n, --limit <n>` | Max records to print |
+| `--json` | Print records as a JSON array of `{sig, formId, editorId, name}` |
+
+Bad arguments exit with code 2; an unreadable or invalid plugin exits with 1. Requires Node.js 18.3+.
+
+Limits: FormIDs are raw (the top byte is the master index, not the load-order slot). Names in localized plugins appear as `<string #id>` because `.STRINGS` files are not read. Only `EDID` and `FULL` are extracted.
+
+```js
+const { parsePlugin } = require('xeditlib/esp');
+const p = parsePlugin('MyMod.esp');        // { oldFormat: true } for Oblivion/FO3/FNV
+console.log(p.masters, [...p.records('ARMO')]);
+```
+
+## Native wrapper platform support
+
+`xelib.js` loads a native XEditLib build:
 
 | OS | Default file (in the package directory) | Bundled |
 |----|------------------------------------------|---------|
@@ -14,30 +55,7 @@ The JavaScript API and CLI have no OS-specific code. They load a native XEditLib
 | macOS | `libXEditLib.dylib` | no |
 | Linux | `libXEditLib.so` | no |
 
-Set `XEDITLIB_PATH` to load a build from anywhere else. Until a macOS/Linux build is supplied, loading fails with an error saying so. Requires Node.js 18.3+.
-
-## CLI
-
-```bash
-npx xeditlib -p "/path/to/Skyrim Special Edition" records Skyrim.esm WEAP -n 5
-npx xeditlib -p "$GAME" masters Update.esm      # or set XEDIT_GAME_PATH
-npx xeditlib --help
-```
-
-| Command | Description |
-|---------|-------------|
-| `records <plugin> <SIG>` | List records of a signature as `formid<TAB>name` |
-| `masters <plugin>` | List a plugin's masters |
-
-| Option | Description |
-|--------|-------------|
-| `-p, --game-path <dir>` | Game install directory (or env `XEDIT_GAME_PATH`) |
-| `-g, --game <mode>` | `tes4`, `fo3`, `fnv`, `tes5`, `sse`, `fo4` (default `sse`) |
-| `-l, --load <list>` | Plugins to load (default: the plugin argument) |
-| `-n, --limit <n>` | Max records to print |
-| `--json` | Print records as one JSON array |
-
-Bad arguments exit with code 2.
+Set `XEDITLIB_PATH` to load a build from anywhere else. Upstream XEditLib only ships for Windows, so on macOS/Linux loading fails with an error saying so unless you supply your own build; use the pure-JS reader instead.
 
 ## Diagnostic readers
 
@@ -76,11 +94,11 @@ This package replaces all of that with pure JavaScript FFI calls via koffi, maki
 npm install xeditlib
 ```
 
-The Windows library and its data files are bundled. For other platforms see *Platform support* above.
+The Windows library and its data files are bundled. For other platforms see *Native wrapper platform support* above.
 
 ### Game path
 
-Always call `setGamePath(dir)` (or pass `--game-path` to the CLI) rather than relying on the library's own lookup, which may use the Windows registry. Paths use your OS's normal format.
+Always call `setGamePath(dir)` rather than relying on the library's own lookup, which may use the Windows registry. Paths use your OS's normal format.
 
 ## Quick Start
 
