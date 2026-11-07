@@ -135,7 +135,7 @@ All 163 XEditLib functions are wrapped. Key categories:
 | `setGamePath(path)` | Set game installation path |
 | `setGameMode(mode)` | Set game mode (`GM_SSE`, `GM_FO4`, etc.) |
 | `setLanguage(lang)` | Set language (e.g. `'English'`) |
-| `loadPlugins(list, smartLoad, buildRefs)` | Load plugins by name (comma or `\n` separated) |
+| `loadPlugins(list, smartLoad, useDummies)` | Load plugins by name (comma or `\n` separated). `useDummies=true` loads empty placeholders, not references |
 | `waitForLoader(timeout?)` | Returns Promise that resolves when loading completes |
 
 ### File Handling

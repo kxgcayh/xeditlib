@@ -352,8 +352,9 @@ const xelib = {
         return getStringArray(len => { if (!raw.GetActivePlugins(len)) fail('GetActivePlugins failed'); });
     },
 
-    loadPlugins(list, smartLoad = true, buildRefs = false) {
-        if (!raw.LoadPlugins(wcb(list), smartLoad ? 1 : 0, buildRefs ? 1 : 0))
+    // useDummies loads empty placeholder files (no records); it is NOT "build references".
+    loadPlugins(list, smartLoad = true, useDummies = false) {
+        if (!raw.LoadPlugins(wcb(list), smartLoad ? 1 : 0, useDummies ? 1 : 0))
             fail('LoadPlugins failed');
     },
     loadPlugin(filename) {
