@@ -1,6 +1,6 @@
 # xeditlib
 
-Node.js wrapper for [XEditLib](https://github.com/z-edit/xedit-lib) — programmatic access to xEdit for Bethesda game plugins (ESP/ESM/ESL).
+Node.js wrapper for [XEditLib](https://github.com/matortheeternal/xedit-lib) — programmatic access to xEdit for Bethesda game plugins (ESP/ESM/ESL).
 
 Uses [koffi](https://koffi.dev/) for FFI bindings. No C++ compilation required — just install and go.
 
@@ -242,10 +242,15 @@ These are documented here because they cost us hours of debugging:
 
 ## Credits
 
-- [XEditLib](https://github.com/z-edit/xedit-lib) by matortheeternal (bundled DLL, MIT license)
-- [zEdit](https://github.com/z-edit/zedit) by matortheeternal (reference implementation)
-- [koffi](https://koffi.dev/) by Niels Martignène (FFI engine)
+This repository is a fork of **[WingedGuardian/xeditlib](https://github.com/WingedGuardian/xeditlib)**. The koffi-based `xelib.js` wrapper, the bundled `XEditLib.dll` setup, the diagnostic-channel handling and the original documentation are WingedGuardian's work; this fork adds the pure-JS plugin reader (`esp.js`), the cross-platform CLI and loader, and the related tests and docs.
+
+Underneath it:
+
+- [XEditLib](https://github.com/matortheeternal/xedit-lib) by matortheeternal: the native library this wraps. The bundled `XEditLib.dll` and the `*.Hardcoded.dat` files come from it, and its source is at that link. It is licensed under the Mozilla Public License 1.1.
+- [xEdit](https://github.com/TES5Edit/TES5Edit) by Elminster, updated and maintained by Sharlikran, Zilav and Hlp: the engine XEditLib is built from (Mozilla Public License).
+- [zEdit](https://github.com/z-edit/zedit) by matortheeternal: the reference implementation whose `xelib` API this follows (MIT).
+- [koffi](https://koffi.dev/) by Niels Martignène: the FFI engine.
 
 ## License
 
-MIT
+The JavaScript in this repository is MIT licensed (see `LICENSE`, Copyright (c) 2026 WingedGuardian). The bundled XEditLib binaries and data files are built from Mozilla Public License 1.1 sources; see Credits for where to get that source.
