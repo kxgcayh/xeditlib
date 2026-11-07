@@ -1,9 +1,5 @@
-// No game/plugin loads or registry edits. The DLL log, if enabled, stays in the caller's scratch cwd.
+// No game/plugin loads or config edits. The DLL log, if enabled, stays in the caller's scratch cwd.
 const assert = require('node:assert/strict');
-if (process.platform !== 'win32') {
-    console.error('COULD NOT CHECK: native XEditLib diagnostics require Windows');
-    process.exit(2);
-}
 const xelib = require('../xelib');
 
 const reads = {}, order = [];

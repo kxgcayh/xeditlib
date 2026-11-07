@@ -33,7 +33,7 @@ function fixture() {
         const name = signature.match(/(\w+)\(/)[1];
         return functions[name] || (() => 1);
     }};
-    const context = { module: {exports: {}}, Buffer, setTimeout, clearTimeout,
+    const context = { process, module: {exports: {}}, Buffer, setTimeout, clearTimeout,
         require(name) {
             if (name === 'koffi') return {load: () => lib};
             if (name === 'path') return path;

@@ -1,10 +1,13 @@
 {
   "name": "xeditlib",
   "version": "1.0.2",
-  "description": "Node.js FFI wrapper for XEditLib.dll — programmatic access to xEdit for Bethesda game plugins (ESP/ESM/ESL)",
+  "description": "Node.js FFI wrapper for XEditLib — programmatic access to xEdit for Bethesda game plugins (ESP/ESM/ESL)",
   "main": "xelib.js",
+  "bin": {
+    "xeditlib": "cli.js"
+  },
   "scripts": {
-    "test": "node --test tests/diagnostics.test.cjs",
+    "test": "node --test tests/*.test.cjs",
     "test:native": "node tests/native-diagnostics.cjs"
   },
   "keywords": [
@@ -34,10 +37,7 @@
   "dependencies": {
     "koffi": "^2.15.1"
   },
-  "os": [
-    "win32"
-  ],
   "engines": {
-    "node": ">=14.0.0"
+    "node": ">=18.3.0"
   }
 }

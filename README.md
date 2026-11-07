@@ -1,8 +1,43 @@
 # xeditlib
 
-Node.js wrapper for [XEditLib.dll](https://github.com/z-edit/xedit-lib) — programmatic access to xEdit for Bethesda game plugins (ESP/ESM/ESL).
+Node.js wrapper for [XEditLib](https://github.com/z-edit/xedit-lib) — programmatic access to xEdit for Bethesda game plugins (ESP/ESM/ESL).
 
 Uses [koffi](https://koffi.dev/) for FFI bindings. No C++ compilation required — just install and go.
+
+## Platform support
+
+The JavaScript API and CLI have no OS-specific code. They load a native XEditLib build:
+
+| OS | Default file (in the package directory) | Bundled |
+|----|------------------------------------------|---------|
+| Windows | `XEditLib.dll` | yes |
+| macOS | `libXEditLib.dylib` | no |
+| Linux | `libXEditLib.so` | no |
+
+Set `XEDITLIB_PATH` to load a build from anywhere else. Until a macOS/Linux build is supplied, loading fails with an error saying so. Requires Node.js 18.3+.
+
+## CLI
+
+```bash
+npx xeditlib -p "/path/to/Skyrim Special Edition" records Skyrim.esm WEAP -n 5
+npx xeditlib -p "$GAME" masters Update.esm      # or set XEDIT_GAME_PATH
+npx xeditlib --help
+```
+
+| Command | Description |
+|---------|-------------|
+| `records <plugin> <SIG>` | List records of a signature as `formid<TAB>name` |
+| `masters <plugin>` | List a plugin's masters |
+
+| Option | Description |
+|--------|-------------|
+| `-p, --game-path <dir>` | Game install directory (or env `XEDIT_GAME_PATH`) |
+| `-g, --game <mode>` | `tes4`, `fo3`, `fnv`, `tes5`, `sse`, `fo4` (default `sse`) |
+| `-l, --load <list>` | Plugins to load (default: the plugin argument) |
+| `-n, --limit <n>` | Max records to print |
+| `--json` | Print records as one JSON array |
+
+Bad arguments exit with code 2.
 
 ## Diagnostic readers
 
@@ -17,14 +52,14 @@ the native message and available stack before constructing its JavaScript error.
 The first native exception can have no captured stack; absence is retained.
 
 Run `npm test` for simulated channel/UTF-16 boundary tests. `npm run test:native`
-qualifies the bundled DLL on Windows, without loading plugins or editing registry
-configuration. It needs koffi installed and may write the DLL's log in its cwd.
+qualifies the native library, without loading plugins or editing system
+configuration. It needs koffi installed and may write the library's log in its cwd.
 
 ## Why this exists
 
 The original [xelib npm package](https://www.npmjs.com/package/xelib) is a placeholder that doesn't work. The real xelib (from [zEdit](https://github.com/z-edit/zedit)) used native C++ bindings via [nan](https://github.com/nodejs/nan), which broke on modern Node.js versions and required a full C++ build toolchain.
 
-This package replaces all of that with pure JavaScript FFI calls via koffi, making it work on any modern Node.js (14+) without compilation.
+This package replaces all of that with pure JavaScript FFI calls via koffi, making it work on any modern Node.js (18.3+) without compilation.
 
 ## Supported Games
 
@@ -41,16 +76,11 @@ This package replaces all of that with pure JavaScript FFI calls via koffi, maki
 npm install xeditlib
 ```
 
-XEditLib.dll and its data files are bundled in the package.
+The Windows library and its data files are bundled. For other platforms see *Platform support* above.
 
-### Registry Requirement
+### Game path
 
-XEditLib reads the game installation path from the Windows registry. For Skyrim SE/VR, you need:
-
-```
-HKLM\SOFTWARE\WOW6432Node\Bethesda Softworks\Skyrim Special Edition
-  Installed Path = "C:\your\game\path\"
-```
+Always call `setGamePath(dir)` (or pass `--game-path` to the CLI) rather than relying on the library's own lookup, which may use the Windows registry. Paths use your OS's normal format.
 
 ## Quick Start
 
@@ -59,7 +89,7 @@ const xelib = require('xeditlib');
 
 xelib.init();
 xelib.setLanguage('English');
-xelib.setGamePath('C:\\Games\\Skyrim Special Edition\\');
+xelib.setGamePath('/path/to/Skyrim Special Edition');
 xelib.setGameMode(xelib.GM_SSE);
 xelib.clearMessages();
 
@@ -179,7 +209,7 @@ All 163 XEditLib functions are wrapped. Key categories:
 ### Handle Management
 Every `getElement`, `getElements`, `fileByName`, etc. returns a handle (uint32). You **must** call `release(handle)` when done to prevent handle leaks. XEditLib has a finite handle store.
 
-### XEditLib.dll Internals
+### XEditLib Internals
 These are documented here because they cost us hours of debugging:
 
 1. **All strings are UCS-2/UTF-16LE** (Delphi `PWideChar`). The wrapper handles this automatically — you pass normal JS strings.

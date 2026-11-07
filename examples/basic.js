@@ -1,8 +1,9 @@
 // Basic example: Load Skyrim.esm and list the first 5 weapons
 const xelib = require('../xelib');
 
-// Initialize — adjust the game path to your installation
-const GAME_PATH = 'C:\\GOG Games\\The Elder Scrolls V Skyrim VR\\';
+// Pass the game directory as an argument or via XEDIT_GAME_PATH
+const GAME_PATH = process.argv[2] || process.env.XEDIT_GAME_PATH;
+if (!GAME_PATH) { console.error('Usage: node basic.js <game dir>'); process.exit(2); }
 
 xelib.init();
 xelib.setLanguage('English');

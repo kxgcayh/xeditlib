@@ -1,4 +1,4 @@
-// XEditLib.dll wrapper - correct signatures from lib.h
+// XEditLib wrapper - correct signatures from lib.h
 // All strings are UCS-2/UTF-16LE (Delphi PWideChar)
 // InitXEdit/CloseXEdit are VOID. WordBool = uint16.
 // String getters use PInteger for length, then GetResultString to retrieve.
@@ -6,7 +6,17 @@
 const koffi = require('koffi');
 const path = require('path');
 
-const lib = koffi.load(path.join(__dirname, 'XEditLib.dll'));
+// XEDITLIB_PATH overrides the library location. Only the Windows DLL is bundled;
+// other platforms need a native build named below (or XEDITLIB_PATH).
+const libName = { win32: 'XEditLib.dll', darwin: 'libXEditLib.dylib' }[process.platform] || 'libXEditLib.so';
+const libPath = process.env.XEDITLIB_PATH || path.join(__dirname, libName);
+let lib;
+try {
+    lib = koffi.load(libPath);
+} catch (e) {
+    throw new Error(`Cannot load ${libPath} (${process.platform}): ${e.message}. ` +
+        'Build or obtain XEditLib for this platform and set XEDITLIB_PATH to it.');
+}
 
 // === Helpers ===
 
@@ -233,9 +243,10 @@ function getArray(fn) {
     const lenBuf = Buffer.alloc(4, 0);
     fn(lenBuf);
     const len = lenBuf.readInt32LE(0);
+    if (len < 0) throw new RangeError('native array length cannot be negative');
     if (len < 1) return [];
     const buf = Buffer.alloc(len * 4, 0);
-    raw.GetResultArray(buf, len);
+    if (!raw.GetResultArray(buf, len)) throw new Error('native array reader failed');
     const arr = [];
     for (let i = 0; i < len; i++) arr.push(buf.readUInt32LE(i * 4));
     return arr;
@@ -432,8 +443,8 @@ const xelib = {
     addElement(h, p = '') {
         return getHandle(r => { if (!raw.AddElement(h, wcb(p), r)) fail('AddElement failed'); });
     },
-    addElementValue(h, p, name, value) {
-        return getHandle(r => { if (!raw.AddElementValue(h, wcb(p), wcb(name), r)) fail('AddElementValue failed'); });
+    addElementValue(h, p, value) {
+        return getHandle(r => { if (!raw.AddElementValue(h, wcb(p), wcb(value), r)) fail('AddElementValue failed'); });
     },
     removeElement(h, p = '') { if (!raw.RemoveElement(h, wcb(p))) fail('RemoveElement failed'); },
     removeElementOrParent(h) { if (!raw.RemoveElementOrParent(h)) fail('RemoveElementOrParent failed'); },
