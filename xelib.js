@@ -5,6 +5,7 @@
 
 const koffi = require('koffi');
 const path = require('path');
+const { withTrailingSep } = require('./paths');
 
 // XEDITLIB_PATH overrides the library location. Only the Windows DLL is bundled;
 // other platforms need a native build named below (or XEDITLIB_PATH).
@@ -338,7 +339,7 @@ const xelib = {
     },
 
     // SETUP
-    setGamePath(p) { if (!raw.SetGamePath(wcb(p))) fail('SetGamePath failed'); },
+    setGamePath(p) { if (!raw.SetGamePath(wcb(withTrailingSep(p)))) fail('SetGamePath failed'); },
     setGameMode(m) { if (!raw.SetGameMode(m)) fail('SetGameMode failed'); },
     setLanguage(l) { if (!raw.SetLanguage(wcb(l))) fail('SetLanguage failed'); },
     setBackupPath(p) { if (!raw.SetBackupPath(wcb(p))) fail('SetBackupPath failed'); },

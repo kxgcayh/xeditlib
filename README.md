@@ -98,7 +98,20 @@ The Windows library and its data files are bundled. For other platforms see *Nat
 
 ### Game path
 
-Always call `setGamePath(dir)` rather than relying on the library's own lookup, which may use the Windows registry. Paths use your OS's normal format.
+Always call `setGamePath(dir)` rather than relying on the library's own lookup, which may use the Windows registry. Paths use your OS's normal format. The native library appends `data\` to the path without a separator, so `setGamePath` adds a trailing separator when you leave it off.
+
+### macOS: the Windows build under CrossOver / Wine
+
+The bundled `XEditLib.dll` runs with a Windows Node under Wine. koffi ships win32 prebuilds, so the same `node_modules` serves both. Measured on macOS 2026-11-09 with CrossOver, Node 24 and `Update.esm`:
+
+```bash
+CX=/Applications/CrossOver.app/Contents/SharedSupport/CrossOver/bin
+CX_BOTTLE_PATH="$HOME/Bottles" "$CX/wine" --bottle <bottle> --no-convert 'Z:\path\to\node.exe' 'Z:\path\to\script.js' > out.txt 2> err.txt
+```
+
+- Send stdout and stderr to separate files. With `2>&1` into a pipe, Node under Wine fails with `EBADF` and hides the real error.
+- Do not pass a game path ending in a backslash on the command line: Wine turns a trailing `\` before the closing quote into a literal `"`. Pass it through an environment variable, or rely on `setGamePath` adding the separator.
+- XEditLib writes `xelib_log.txt` into the current directory; run from a scratch directory.
 
 ## Quick Start
 
