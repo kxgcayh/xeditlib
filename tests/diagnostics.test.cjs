@@ -37,6 +37,7 @@ function fixture() {
         require(name) {
             if (name === 'koffi') return {load: () => lib};
             if (name === 'path') return path;
+            if (name === './paths') return require('../paths');
             throw new Error('unexpected dependency: ' + name);
         }, __dirname: path.resolve(__dirname, '..') };
     vm.runInNewContext(fs.readFileSync(path.join(__dirname, '../xelib.js'), 'utf8'), context);
