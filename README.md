@@ -9,7 +9,7 @@ Uses [koffi](https://koffi.dev/) for FFI bindings. No C++ compilation required ‚
 | | Pure-JS reader (`esp.js`, CLI) | Native wrapper (`xelib.js`) |
 |---|---|---|
 | Needs XEditLib | no | yes |
-| Windows / macOS / Linux | yes | Windows (DLL bundled); other OSes need a build you supply |
+| Windows / macOS / Linux | yes | Windows and macOS arm64 bundled (`libXEditLib.dylib`); Linux needs a build you supply |
 | Read plugins | yes (records, masters) | yes (everything xEdit does) |
 | Edit / save, conflicts, references | no | yes |
 
@@ -52,10 +52,23 @@ console.log(p.masters, [...p.records('ARMO')]);
 | OS | Default file (in the package directory) | Bundled |
 |----|------------------------------------------|---------|
 | Windows | `XEditLib.dll` | yes |
-| macOS | `libXEditLib.dylib` | no |
+| macOS | `libXEditLib.dylib` | yes (arm64) |
 | Linux | `libXEditLib.so` | no |
 
-Set `XEDITLIB_PATH` to load a build from anywhere else. Upstream XEditLib only ships for Windows, so on macOS/Linux loading fails with an error saying so unless you supply your own build; use the pure-JS reader instead.
+Set `XEDITLIB_PATH` to load a build from anywhere else. Linux still needs a supplied build; use the pure-JS reader instead if no build is available.
+
+## macOS native build
+
+Built from [XEditLib macOS source](https://github.com/kxgcayh/xedit-lib/tree/df2f8773c67a11b49b9d83fd0fd80067832ced6d), using Free Pascal 3.2.2, aarch64-darwin.
+
+- SHA-256: `373547cd0f18173607b01e65ab287096985a0938422bcdf1a7609b6ea8b4f36a`
+- Dynamically links macOS system /usr/lib/libz.1.dylib (zlib).
+- The `*.Hardcoded.dat` files must stay beside it.
+
+Known differences:
+- `GetGameLanguage` returns the language from installed Skyrim INIs, where the Windows DLL in a bare environment returns an error.
+- JSON nesting limit about 1000 levels vs 2000-4000 in the Windows DLL.
+- `File:hex6` FormID strings are not accepted by `ElementFromJson`, same as the Windows DLL.
 
 ## Diagnostic readers
 
@@ -94,7 +107,7 @@ This package replaces all of that with pure JavaScript FFI calls via koffi, maki
 npm install xeditlib
 ```
 
-The Windows library and its data files are bundled. For other platforms see *Native wrapper platform support* above.
+The Windows and macOS arm64 libraries and data files are bundled. For other platforms see *Native wrapper platform support* above.
 
 ### Game path
 
@@ -259,11 +272,22 @@ This repository is a fork of **[WingedGuardian/xeditlib](https://github.com/Wing
 
 Underneath it:
 
-- [XEditLib](https://github.com/matortheeternal/xedit-lib) by matortheeternal: the native library this wraps. The bundled `XEditLib.dll` and the `*.Hardcoded.dat` files come from it, and its source is at that link. It is licensed under the Mozilla Public License 1.1.
-- [xEdit](https://github.com/TES5Edit/TES5Edit) by Elminster, updated and maintained by Sharlikran, Zilav and Hlp: the engine XEditLib is built from (Mozilla Public License).
-- [zEdit](https://github.com/z-edit/zedit) by matortheeternal: the reference implementation whose `xelib` API this follows (MIT).
+- [XEditLib](https://github.com/matortheeternal/xedit-lib) by matortheeternal: Mozilla Public License 1.1 (https://github.com/matortheeternal/xedit-lib).
+- [xEdit](https://github.com/TES5Edit/TES5Edit) by Elminster, updated and maintained by Sharlikran, Zilav, Hlp and contributors: the engine XEditLib is built from: Mozilla Public License 1.1.
+- macOS port of XEditLib by kxgcayh: Mozilla Public License 1.1 (https://github.com/kxgcayh/xedit-lib/tree/macos-arm64).
+  - Argo by Colin (matortheeternal): MIT.
+  - mteHelpers by matortheeternal: Mozilla Public License 1.1.
+  - Imaging by Marek Mauder: Mozilla Public License 1.1 or LGPL.
+  - Imaging PasZLib by Jacques Nomssi Nzali, based on zlib by Jean-loup Gailly and Mark Adler: zlib licence.
+  - BSArch by Zilav: Mozilla Public License 1.1.
+  - LZ4 and xxHash by Yann Collet, Pascal port by Jose Pascoa: BSD 2-Clause.
+  - ZLibEx by Brent Sherwood / base2 technologies, with Borland Software Corporation copyright: zlib-style licence.
+  - TForge by Sergey Kasandrov: Apache License 2.0.
+  - Apple system zlib by Jean-loup Gailly and Mark Adler: zlib licence.
+- Mahogany by Colin (matortheeternal): MIT.
+- [zEdit](https://github.com/z-edit/zedit) by matortheeternal: the reference implementation whose xelib API this follows: MIT.
 - [koffi](https://koffi.dev/) by Niels Martign√®ne: the FFI engine.
 
 ## License
 
-The JavaScript in this repository is MIT licensed (see `LICENSE`, Copyright (c) 2026 WingedGuardian). The bundled XEditLib binaries and data files are built from Mozilla Public License 1.1 sources; see Credits for where to get that source.
+The JavaScript in this repository is MIT licensed (see `LICENSE`, Copyright (c) 2026 WingedGuardian). The bundled native libraries and Hardcoded.dat files contain MPL 1.1 Covered Code and separately licensed components listed in THIRD_PARTY_NOTICES.txt. Source for the Windows library and data files is available under MPL 1.1 at https://github.com/matortheeternal/xedit-lib. The complete corresponding source for the bundled macOS library, including port changes and build scripts, is available under MPL 1.1 at https://github.com/kxgcayh/xedit-lib/tree/df2f8773c67a11b49b9d83fd0fd80067832ced6d. These source-code rights are unaffected by the JavaScript's MIT licence.

@@ -1,6 +1,6 @@
 {
   "name": "xeditlib",
-  "version": "1.0.2",
+  "version": "1.1.0",
   "description": "Bethesda plugin (ESP/ESM/ESL) tools: a cross-platform pure-JS reader and CLI, plus a Node.js FFI wrapper for XEditLib",
   "main": "xelib.js",
   "bin": {
